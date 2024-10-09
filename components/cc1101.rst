@@ -6,7 +6,7 @@ CC1101 Low-Power Sub-1 GHz RF Transceiver
     :image: cc1101.jpg
     :keywords: cc1101
 
-The ``CC1101 RF Tranceiver`` (`datasheet <https://www.ti.com/lit/ds/symlink/cc1101.pdf>`__) can be used together 
+The ``CC1101 RF Tranceiver`` (`datasheet <https://github.com/gabest11/datasheet/blob/main/CC1101.pdf>`__) can be used together 
 with the ``remote_transmitter`` and ``remote_receiver`` components to communicate over free to use frequencies 
 like 433.92 or 868 MHz. 
 
