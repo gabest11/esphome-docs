@@ -50,6 +50,24 @@ Configuration variables:
           inverted: true
 
 
+.. note::
+
+    While output is expected to be binary, it is possible to use any light that inherits from a binary output. For example if you need to dim the status LED on a ESP8266, you can use this code:
+
+    .. code-block:: yaml
+
+        light:
+          - platform: status_led
+            output: status_led_output
+
+        output:
+          - platform: esp8266_pwm
+            id: status_led_output
+            max_power: 50%
+            pin: 
+              number: GPIOXX
+              inverted: true
+
 
 See Also
 --------
