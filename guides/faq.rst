@@ -421,14 +421,14 @@ is bound to cause problems. This is due to the fact that mDNS is used to find th
   each node instead. See the :ref:`notes in the Docker Reference section <docker-reference-notes>` for more information.
 
 Can Configuration Files Be Recovered From The Device?
------------------------------------------------------
+------------------------------------------------------
 
-If you lost your ESPHome YAML configuration files, there's no way to recover them.
-The configuration is *not* stored on the device directly - only the generated firmware is on
-the device itself (technically, the configuration can be reverse-engineered from that, but only
-with a lot of work).
+Previously, if you lost your ESPHome YAML configuration files, there was no way to recover them directly from the device, as only the generated firmware was stored on the device. Technically, the configuration could be reverse-engineered from the firmware, but it would require a lot of work.
 
-Always back up all your files!
+**However, with recent updates**, ESPHome now includes an option to retrieve the configuration directly from the device using the :doc:`store_yaml component </components/store_yaml>`. This makes it easier to recover your setup if your original YAML files are lost. Keep in mind that this feature may have limitations or depend on certain conditions in your ESPHome setup.
+
+.. warning::
+    Even with this new capability, it's still essential to back up your configuration files to prevent accidental data loss or reliance on device recovery alone.
 
 
 Why shouldn't I use underscores in my device name?
