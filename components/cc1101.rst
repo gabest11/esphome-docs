@@ -263,6 +263,20 @@ Transmit a message using the button component
 
 Transfers, except transmit_rc_switch_raw_cc1101, must be surrounded with ``cc1101.begin_tx`` and ``cc1101.end_tx``.
 
+Alternatively (this the new prefered way):
+
+.. code-block:: yaml
+
+    remote_transmitter:
+      on_transmit:
+        then:
+          - cc1101.begin_tx: transceiver
+      on_complete:
+        then:
+          - cc1101.end_tx: transceiver
+
+In this case, you can just use ``remote_transmitter.transmit_rc_switch_raw`` or any other device specific ``trasmit_*`` action.
+
 Example pinout for a few tested boards
 --------------------------------------
 
