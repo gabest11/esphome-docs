@@ -157,7 +157,7 @@ Full configuration with default values
 - **if_frequency** (*Optional*, float): Intermediate frequency. 25 to 788 kHz.
 - **bandwidth** (*Optional*, float): Sets the decimation ratio for the delta-sigma ADC input stream and thus the channel bandwidth. 58 to 812 kHz.
 - **channel** (*Optional*, uint8_t): Channel offset relative to frequency. Always in the positive direction.
-- **channel_spacing** (*Optional*, float): This is added to the frequency `channel` number of times. 25 to 405 kHz.
+- **channel_spacing** (*Optional*, float): This is added to the frequency, `channel` number of times. 25 to 405 kHz.
 - **fsk_deviation** (*Optional*, float): TX: Specifies the nominal frequency deviation from the carrier. RX: Specifies the expected frequency deviation from the incoming signal, must be approximately right for the demodulator to be performed reliably and robustly.
 - **msk_deviation** (*Optional*, int): Tx: Specifies the fraction of symbol period (N/8) during which a phase change occurs. RX: no effect.
 - **symbol_rate** (*Optional*, int): 600 to 500000 Baud.
