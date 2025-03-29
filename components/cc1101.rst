@@ -10,7 +10,7 @@ The ``CC1101 RF Tranceiver`` (`datasheet <https://github.com/gabest11/datasheet/
 with the ``remote_transmitter`` and ``remote_receiver`` components to communicate over free to use frequencies 
 like 433.92 or 868 MHz. 
 
-Tested frameworks are Arduino and esp-idf but it might work with others.
+Tested frameworks are Arduino and ESP-IDF but it might work with others.
 
 .. figure:: images/cc1101-full.jpg
     :align: center
@@ -22,9 +22,9 @@ On ESP8266, you can use a single pin instead of GD0O and GD02 (gdo0_pin is an op
 the pin direction will be reversed for the transfers.
 
 On ESP32, this will not work, you must connect two separate pins. remote_transmitter to GDO0, remote_receiver to GDO2.
-If only trasmitting works, they are probably switched.
+If only trasmitting works, they are probably swapped.
 
-The ESP8266 can also work with two separate pins, of course. If no gdo0_pin is given, that's the default mode.
+The ESP8266 can also work with two separate pins. If no gdo0_pin is given, that is the default mode.
 
 Example configuration for ESP8266
 ---------------------------------
@@ -42,14 +42,20 @@ Example configuration for ESP8266
       gdo0_pin:
         number: D1
         allow_other_uses: true
-      bandwidth: 200
-      frequency: 433920
+      tuner:
+        frequency: 433920
 
     remote_transmitter:
       pin:
         number: D1  # GDO0
         allow_other_uses: true
       carrier_duty_percent: 100%
+      on_transmit:
+        then:
+          - cc1101.begin_tx: transceiver
+      on_complete:
+        then:
+          - cc1101.end_tx: transceiver
 
     remote_receiver:
       pin:
@@ -58,13 +64,8 @@ Example configuration for ESP8266
       dump:
         - rc_switch
       tolerance: 50%
-      buffer_size: 256
+      buffer_size: 1kB
       filter: 250us
-      idle: 4ms
-
-.. note::
-
-    ``buffer_size`` on ESP8266 is actually four times as big, the given number is used to allocate a 32-bit array for microsecond timestamps. ``buffer_size: 256`` will allocate 1kB. The default setting will actually allocate 4kB, a significant portion of the 80kB total memory.
 
 Example configuration for ESP32
 -------------------------------
@@ -81,12 +82,18 @@ Based on a generic nodemcu-32s board.
     cc1101:
       id: transceiver
       cs_pin: GPIO5
-      bandwidth: 200
-      frequency: 433920
+      tuner:
+        frequency: 433920
 
     remote_transmitter:
       pin: GPIO32  # GDO0
       carrier_duty_percent: 100%
+      on_transmit:
+        then:
+          - cc1101.begin_tx: transceiver
+      on_complete:
+        then:
+          - cc1101.end_tx: transceiver
 
     remote_receiver:
       pin: GPIO33  # GDO2
@@ -95,136 +102,85 @@ Based on a generic nodemcu-32s board.
       tolerance: 50%
       buffer_size: 2kb
       filter: 250us
-      idle: 4ms
 
-Example configuration for ESP32-C3
-----------------------------------
-
-This one has a problem (`<https://github.com/esphome/issues/issues/2934>`__) which needs a workaround. And it does not seem to work with the Arduino framework, use esp-idf only.
-
-Basically, the receiver has to be pushed to the third channel by adding a dummy transmitter to an unused pin.
+Full configuration with default values
+--------------------------------------
 
 .. code-block:: yaml
 
-    spi:
-      clk_pin: GPIO6
-      miso_pin: GPIO5
-      mosi_pin: GPIO7
-
     cc1101:
       id: transceiver
-      cs_pin: GPIO10
-      bandwidth: 200
-      frequency: 433920
+      cs_pin: ..
+      gdo0_pin: ..
+      output_power: 11
+      rx_attenuation: 0dB
+      dc_blocking_filter: True
+      tuner:
+        frequency: 433920
+        if_frequency: 153
+        bandwidth: 203
+        channel: 0
+        channel_spacing: 200
+        # fsk_deviation: 47.607
+        # msk_deviation: 0
+        symbol_rate: 5000
+        modulation: ASK/OOK
+      agc:
+        magn_target: 42
+        max_lna_gain: Default
+        max_dva_gain: Default
+        carrier_sense_abs_thr: 0
+        carrier_sense_rel_thr: Default
+        lna_priority: True
+        filter_length_fsk_msk: 16
+        filter_length_ask_ook: 8dB
+        freeze: Default
+        wait_time: 16
+        hyst_level: Medium
+      sensor:
+        chip_id:
+          name: CC1101 Chip Id
+        rssi:
+          name: CC1101 RSSI
+        lqi:
+          name: CC1101 LQI
+        temperature:
+          name: CC1101 Temperature
 
-    remote_transmitter:
-      - pin: GPIO8
-        id: dummy_transmitter
-      - pin: GPIO3  # GDO0
-        carrier_duty_percent: 100%
-        id: real_transmitter
 
-    remote_receiver:
-      pin: GPIO4  # GDO2
-      dump:
-        - rc_switch
-      tolerance: 50%
-      buffer_size: 2kb
-      filter: 250us
-      idle: 4ms
-
-Alternatively these modified remote components can directly set ``rmt_channel``.
-
-- `<https://github.com/predam/remote_transmitter/>`__
-- `<https://github.com/Jorre05/remote_receiver/>`__
+- **cs_pin** (**Required**, :ref:`config-pin`): SPI chip select pint.
+- **gdo0_pin** (*Optional*, :ref:`config-pin`): Bi-directional pin for ESP8266.
+- **output_power** (*Optional*, float): -70 to 11. In dBm.
+- **rx_attenuation** (*Optional*, enum): 0dB, 6dB, 12dB, 18dB.
+- **dc_blocking_filter** (*Optional*, boolean): Digital DC blocking filter before demodulator. True: better sensitivity, False: current optimized, only for data rates below 250 kBaud.
+- **frequency** (*Optional*, float): Valid range is 300000 to 928000 kHz.
+- **if_frequency** (*Optional*, float): Intermediate frequency. 25 to 788 kHz.
+- **bandwidth** (*Optional*, float): Sets the decimation ratio for the delta-sigma ADC input stream and thus the channel bandwidth. 58 to 812 kHz.
+- **channel** (*Optional*, uint8_t): Channel offset relative to frequency. Always in the positive direction.
+- **channel_spacing** (*Optional*, float): This is added to the frequency `channel` number of times. 25 to 405 kHz.
+- **fsk_deviation** (*Optional*, float): TX: Specifies the nominal frequency deviation from the carrier. RX: Specifies the expected frequency deviation from the incoming signal, must be approximately right for the demodulator to be performed reliably and robustly.
+- **msk_deviation** (*Optional*, int): Tx: Specifies the fraction of symbol period (N/8) during which a phase change occurs. RX: no effect.
+- **symbol_rate** (*Optional*, int): 600 to 500000 Baud.
+- **modulation** (*Optional*, enum): 2-FSK, GFSK, ASK/OOK, 4-FSK, MSK.
+- **magn_target** (*Optional*, enum): 24dB, 27dB, 30dB, 33dB, 36dB, 38dB, 40dB, 42dB. Sets the absolute RSSI threshold for asserting carrier sense.
+- **max_lna_gain** (*Optional*, enum): Default, 2.6dB, 6.1dB, 7.4dB, 9.2dB, 11.5dB, 14.6dB, 17.1dB. Sets the maximum allowable LNA + LNA 2 gain relative to the maximum possible gain.
+- **max_dva_gain** (*Optional*, enum): Default, -1, -2, -3. Reduces the maximum allowable DVGA gain.
+- **carrier_sense_abs_thr** (*Optional*, int): -8 to 7. Sets the absolute RSSI threshold for asserting carrier sense.
+- **carrier_sense_rel_thr** (*Optional*, enum): Default, +6dB, +10dB, +14dB. Sets the relative change threshold for asserting carrier sense.
+- **lna_priority** (*Optional*, boolean): Selects between two different strategies for LNA and LNA 2 gain adjustment. When `True`, the LNA gain is decreased first. When `False`, the LNA 2 gain is decreased to minimum before decreasing LNA gain.
+- **filter_length_fsk_msk** (*Optional*, enum): 8, 16, 32, 64. Sets the averaging length for the amplitude from the channel filter.  
+- **filter_length_ask_ook** (*Optional*, enum): 4dB, 8dB, 12dB, 16dB. Sets the OOK/ASK decision boundary for OOK/ASK reception.
+- **freeze** (*Optional*, enum): Default, On Sync, Analog Only, Analog And Digital. Control when the AGC gain should be frozen.
+- **wait_time** (*Optional*, enum): 8, 16, 24, 32. Sets the number of channel filter samples from a gain adjustment has been made until the AGC algorithm starts accumulating new samples.
+- **hyst_level** (*Optional*, enum): None, Low, Medium, High. Sets the level of hysteresis on the magnitude deviation (internal AGC signal that determine gain changes).
+- **chip_id** (*Optional*): PPVV where PP is the part number, VV is the version.
+- **rssi** (*Optional*): RSSI sensor. Value in dBm. The RSSI value is an estimate of the signal power level in the chosen channel. See datasheet 17.3 for further information.
+- **lqi** (*Optional*): Link Quality Indicator sensor. The Link Quality Indicator is a metric of the current quality of the received signal. See datasheet 17.6 for further information.
+- **temperature** (*Optional*): Integrated temperature sensor. It is not possible to read as of now. GDO0 has to function as an ADC pin.
 
 .. note::
 
-    `PR#6497 <https://github.com/esphome/esphome/pull/6497>`__ integrated these changes into the main codebase.
-
-.. code-block:: yaml
-
-    remote_transmitter:
-      pin: GPIO3  # GDO0
-      carrier_duty_percent: 100%
-      rmt_channel: 0
-
-    remote_receiver:
-      pin: GPIO4  # GDO2
-      rmt_channel: 2
-      dump:
-        - rc_switch
-      tolerance: 50%
-      buffer_size: 2kb
-      filter: 250us
-      idle: 4ms
-
-Sensors for RSSI and LQI. dBm and a raw number.
-
-.. code-block:: yaml
-
-    cc1101:
-      id: transceiver
-      cs_pin: GPIO5
-      bandwidth: 200
-      frequency: 433920
-      rssi:
-        name: "RSSI"
-      lqi:
-        name: "LQI"
-
-The CC1101 also has a temperature sensor. It is possible to use it on the ESP32, but because the temperature is reported on the GDO0 pin as an analog signal, it also has to be connected to an ADC capable input pin (ESP8266 does not have such). The ADC pin is an input pin, when gdo0_adc_id is set, transmission will not work. Currently there is no solution to this. To restore transmission a new firmware without gdo0_adc_id has to be flushed and the device must be reset.
-
-.. code-block:: yaml
-
-    sensor:
-      - platform: adc
-        pin:
-          number: GPIO32
-          allow_other_uses: true
-        name: "ADC"
-        id: gdo0_adc
-        update_interval: 10s
-
-    cc1101:
-      id: transceiver
-      cs_pin: GPIO5
-      gdo0_pin:
-        number: GPIO32
-        allow_other_uses: true
-      gdo0_adc_id: gdo0_adc
-      bandwidth: 200
-      frequency: 433920
-      temperature:
-        name: "Temperature"
-
-    remote_transmitter:
-      pin:
-        number: GPIO32 # This is GDO0
-        allow_other_uses: true
-      carrier_duty_percent: 100%
-
-    remote_receiver:
-      pin: GPIO33 # This is GDO2
-      dump:
-        - rc_switch
-      # Settings to optimize recognition of RF devices
-      tolerance: 50%
-      buffer_size: 2kb
-      filter: 250us
-      idle: 4ms
-
-Configuration variables:
-------------------------
-
-- **cs_pin** (**Required**, :ref:`config-pin`): SPI Chip Select.
-- **gdo0_pin** (*Optional*, :ref:`config-pin`): This is the bidirectional pin for ESP8266.
-- **gdo0_adc_id** (*Optional*, string): ADC id to be used by the temperature sensor.
-- **bandwidth** (*Optional*, int): Defaults to 200 KHz.
-- **frequency** (*Optional*, int): Defaults to 433920 KHz.
-- **rssi** (*Optional*): RSSI sensor. Value in dBm. The RSSI value is an estimate of the signal power level in the chosen channel. See datasheet 17.3 for further information.
-- **lqi** (*Optional*): Link Quality Indicator sensor. The Link Quality Indicator is a metric of the current quality of the received signal. See datasheet 17.6 for further information.
-- **temperature** (*Optional*): Integrated temperature sensor.
+  `fsk_deviation` and `msk_deviation` use the same register, just like `filter_length_fsk_msk` and `filter_length_ask_ook`, do not set both.
 
 Detect a magnetic window sensor
 -------------------------------
@@ -248,8 +204,7 @@ Transmit a message using the button component
       - platform: template
         name: "Gate"
         on_press:
-          # - cc1101.begin_tx: transceiver
-          - remote_transmitter.transmit_rc_switch_raw_cc1101:
+          - remote_transmitter.transmit_rc_switch_raw:
               code: '0111000110010011110110010100011111110001001011110111'
               protocol:
                 pulse_length: 434
@@ -259,23 +214,6 @@ Transmit a message using the button component
                 inverted: true
               repeat:
                 times: 10
-          # - cc1101.end_tx: transceiver
-
-Transfers, except transmit_rc_switch_raw_cc1101, must be surrounded with ``cc1101.begin_tx`` and ``cc1101.end_tx``.
-
-Alternatively (this the new prefered way):
-
-.. code-block:: yaml
-
-    remote_transmitter:
-      on_transmit:
-        then:
-          - cc1101.begin_tx: transceiver
-      on_complete:
-        then:
-          - cc1101.end_tx: transceiver
-
-In this case, you can just use ``remote_transmitter.transmit_rc_switch_raw`` or any other device specific ``trasmit_*`` action.
 
 Example pinout for a few tested boards
 --------------------------------------
