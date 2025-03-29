@@ -219,7 +219,7 @@ Direct control through entities in HA
           name: Input rx_attenuation
         tuner:
           modulation:
-            name: Tuner Modulation
+            name: Tuner modulation
         agc:
           magn_target:
             name: AGC magn_target
