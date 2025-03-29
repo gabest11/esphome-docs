@@ -180,7 +180,77 @@ Full configuration with default values
 
 .. note::
 
-  `fsk_deviation` and `msk_deviation` use the same register, just like `filter_length_fsk_msk` and `filter_length_ask_ook`, do not set both.
+    `fsk_deviation` and `msk_deviation` use the same register, just like `filter_length_fsk_msk` and `filter_length_ask_ook`, do not set both.
+
+Direct control through entities in HA
+-------------------------------------
+
+.. code-block:: yaml
+
+
+    number:
+      - platform: cc1101
+        output_power:
+          name: Output output_power
+        tuner:
+          frequency:
+            name: Tuner frequency
+          if_frequency:
+            name: Tuner if_frequency
+          bandwidth:
+            name: Tuner bandwidth
+          channel:
+            name: Tuner channel
+          channel_spacing:
+            name: Tuner channel_spacing
+          fsk_deviation:
+            name: Tuner fsk_deviation
+          msk_deviation:
+            name: Tuner msk_deviation
+          symbol_rate:
+            name: Tuner symbol_rate
+        agc:
+          carrier_sense_abs_thr:
+            name: AGC carrier_sense_abs_thr
+
+    select:
+      - platform: cc1101
+        rx_attenuation:
+          name: Input rx_attenuation
+        tuner:
+          modulation:
+            name: Tuner Modulation
+        agc:
+          magn_target:
+            name: AGC magn_target
+          max_lna_gain:
+            name: AGC max_lna_gain
+          max_dva_gain:
+            name: AGC max_dva_gain
+          carrier_sense_rel_thr:
+            name: AGC carrier_sense_rel_thr
+          filter_length_fsk_msk:
+            name: AGC filter_length_fsk_msk
+          filter_length_ask_ook:
+            name: AGC filter_length_ask_ook
+          freeze:
+            name: AGC freeze
+          wait_time:
+            name: AGC wait_time
+          hyst_level:
+            name: AGC hyst_level
+    
+    switch:
+      - platform: cc1101
+        dc_blocking_filter:
+          name: Input dc_blocking_filter
+        agc:
+          lna_priority:
+            name: AGC lna_priority
+
+.. note::
+
+    Putting everything into the config can increase memory use by 10k.
 
 Detect a magnetic window sensor
 -------------------------------
