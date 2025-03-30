@@ -162,7 +162,7 @@ Full configuration with default values
 - **msk_deviation** (*Optional*, int): Tx: Specifies the fraction of symbol period (N/8) during which a phase change occurs. RX: no effect.
 - **symbol_rate** (*Optional*, int): 600 to 500000 Baud.
 - **modulation** (*Optional*, enum): 2-FSK, GFSK, ASK/OOK, 4-FSK, MSK.
-- **magn_target** (*Optional*, enum): 24dB, 27dB, 30dB, 33dB, 36dB, 38dB, 40dB, 42dB. Sets the absolute RSSI threshold for asserting carrier sense.
+- **magn_target** (*Optional*, enum): 24dB, 27dB, 30dB, 33dB, 36dB, 38dB, 40dB, 42dB. Sets the absolute RSSI threshold for asserting carrier sense. Lowering this can improve range, but will also let thought more noise.
 - **max_lna_gain** (*Optional*, enum): Default, 2.6dB, 6.1dB, 7.4dB, 9.2dB, 11.5dB, 14.6dB, 17.1dB. Sets the maximum allowable LNA + LNA 2 gain relative to the maximum possible gain.
 - **max_dva_gain** (*Optional*, enum): Default, -1, -2, -3. Reduces the maximum allowable DVGA gain.
 - **carrier_sense_abs_thr** (*Optional*, int): -8 to 7. Sets the absolute RSSI threshold for asserting carrier sense.
