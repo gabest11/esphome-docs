@@ -69,6 +69,8 @@ Configuration variables:
   - **toto**: Decode and dump Toto infrared codes.
   - **weather_station_2032**: Decode and dump WS2032 weather station data.
   - **weather_station_4ld**: Decode and dump Lidl 4LD weather station data.
+  - **weather_station_bresser3ch**: Decode and dump Bresser 3CH weather station data.
+  - **weather_station_eurochron**: Decode and dump Eurochron weather station data.
   - **weather_station_h10515**: Decode and dump Lidl H10515/DCF weather station data.
   - **weather_station_h13726**: Decode and dump Lidl H13726 weather station data.
   - **weather_station_l08037a**: Decode and dump Lidl L08037A weather station data.
@@ -257,6 +259,8 @@ Automations:
 
   - **on_weather_station_2032**: WS2032 weather station.
   - **on_weather_station_4ld**: Lidl Auriol 4LD5661/4LD5972/4LD6313/4LD6654.
+  - **on_weather_station_bresser3ch**: Bresser 3CH ???
+  - **on_weather_station_eurochron**: Eurochron ???
   - **on_weather_station_h10515**: Lidl H10515/DCF.
   - **on_weather_station_h13726**: Lidl Auriol H13726, Ventus WS155, Hama EWS 1500, Meteoscan W155/W160, Unitec W186-F.
   - **on_weather_station_l08037a**: Lidl 40782 L08037A.
@@ -541,6 +545,8 @@ Remote code selection (exactly one of these has to be included):
 
 - **weather_station_2032**: Trigger on a decoded WS2032 weather station data.
 - **weather_station_4ld**: Trigger on a decoded Lidl 4LD weather station data.
+- **weather_station_bresser3ch**: Trigger on a decoded Bresser 3CH weather station data.
+- **weather_station_eurochron**: Trigger on a decoded Eurochron weather station data.
 - **weather_station_h10515**: Trigger on a decoded Lidl H10515/DCF weather station data.
 - **weather_station_h13726**: Trigger on a decoded Lidl H13726 weather station data.
 - **weather_station_l08037a**: Trigger on a decoded Lidl L08037A weather station data.
